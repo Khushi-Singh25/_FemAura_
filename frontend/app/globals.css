@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+:root {
+  /* Pastel Palette */
+  --background: #FFF9FA; /* Very light pinkish white */
+  --foreground: #4A4A4A; /* Soft dark gray text */
+  
+  --primary: #FFB7B2; /* Soft Coral/Pink */
+  --primary-dark: #FF9E99;
+  --secondary: #C7CEEA; /* Periwinkle */
+  --accent: #B5EAD7; /* Mint */
+  --accent-dark: #95D6C0;
+  --warning: #FFDAC1; /* Peach */
+  --highlight: #E2F0CB; /* Pale Green */
+  
+  --card-bg: #FFFFFF;
+  --nav-bg: rgba(255, 255, 255, 0.8);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
+  --color-warning: var(--warning);
+  --color-highlight: var(--highlight);
+  --color-card-bg: var(--card-bg);
+  --color-nav-bg: var(--nav-bg);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', sans-serif; /* Will rely on default sans or import one later */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Utilities if needed */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
