@@ -49,7 +49,7 @@ const managementTips = [
 export default function AwarenessPage() {
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-b from-background to-primary/5 py-20 px-4 sm:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-background to-primary/5 py-20 px-4 sm:px-8">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -168,7 +168,7 @@ export default function AwarenessPage() {
           </a>
         </motion.div>
       </div>
-      </div>
+    </div>
     </ProtectedRoute>
   );
 }

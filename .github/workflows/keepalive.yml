@@ -1,0 +1,47 @@
+name: Keep Services Warm
+
+on:
+  schedule:
+    # Runs every 10 minutes (GitHub Actions free tier)
+    - cron: '*/10 * * * *'
+  workflow_dispatch:  # Allows manual triggering from Actions tab
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Ping Node.js Backend Health
+        run: |
+          echo "Pinging Node backend..."
+          curl -f ${{ secrets.NODE_BACKEND_URL }}/health || echo "Node backend ping failed (may be sleeping)"
+        continue-on-error: true
+      
+      - name: Ping Python Backend Health
+        run: |
+          echo "Pinging Python backend..."
+          curl -f ${{ secrets.PYTHON_BACKEND_URL }}/health || echo "Python backend ping failed (may be sleeping)"
+        continue-on-error: true
+      
+      - name: Ping Node Backend Keepalive
+        run: |
+          echo "Sending keepalive to Node backend..."
+          curl -f ${{ secrets.NODE_BACKEND_URL }}/keepalive || echo "Keepalive failed"
+        continue-on-error: true
+      
+      - name: Ping Python Backend Keepalive
+        run: |
+          echo "Sending keepalive to Python backend..."
+          curl -f ${{ secrets.PYTHON_BACKEND_URL }}/keepalive || echo "Keepalive failed"
+        continue-on-error: true
+      
+      - name: Ping Frontend
+        run: |
+          echo "Pinging frontend..."
+          curl -f ${{ secrets.FRONTEND_URL }} || echo "Frontend ping failed"
+        continue-on-error: true
+      
+      - name: Report Status
+        run: |
+          echo "✅ Keep-alive pings completed"
+          echo "Timestamp: $(date)"

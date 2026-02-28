@@ -128,21 +128,21 @@ export default function TrackerPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-b from-background to-rose-50 py-10 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto"> {/* Increased max-width to allow equal card sizes */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
             className="text-center mb-10"
-          >
+        >
             <h1 className="text-4xl font-bold mb-3 text-rose-900">Your Symptom & Mood Tracker</h1>
             <p className="text-lg text-gray-600">
               Log how you feel daily. We'll visualize your mood and symptoms to help you understand your body better.
-            </p>
-          </motion.div>
+          </p>
+        </motion.div>
 
           {/* Top Row: Equal Width Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             {/* Left Column: Log Form */}
-            <motion.div
+        <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="bg-white rounded-3xl p-6 shadow-lg border border-rose-100 h-full"
@@ -155,11 +155,11 @@ export default function TrackerPage() {
                 <div className="flex gap-4">
                   <div className="flex-1">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                    <input
-                      type="date"
-                      value={selectedDate}
-                      onChange={(e) => setSelectedDate(e.target.value)}
-                      max={new Date().toISOString().split('T')[0]}
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                max={new Date().toISOString().split('T')[0]}
                       className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-200 outline-none"
                     />
                   </div>
@@ -174,28 +174,28 @@ export default function TrackerPage() {
                       <span className="font-medium text-rose-700">I'm on my period</span>
                     </label>
                   </div>
-                </div>
+            </div>
 
-                <div>
+            <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">How is your mood?</label>
                   <div className="grid grid-cols-4 gap-2">
                     {moodOptions.map((option) => (
-                      <button
+                  <button
                         key={option.label}
-                        type="button"
+                    type="button"
                         onClick={() => setSelectedMood(option.label)}
                         className={`flex flex-col items-center p-2 rounded-xl border-2 transition-all ${
                           selectedMood === option.label
                             ? "border-rose-400 bg-rose-50"
                             : "border-gray-100 hover:border-rose-200"
-                        }`}
-                      >
+                    }`}
+                  >
                         <option.icon size={24} className={option.color} />
                         <span className="text-xs mt-1 font-medium">{option.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                  </button>
+                ))}
+              </div>
+            </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -213,7 +213,7 @@ export default function TrackerPage() {
                       <span>High</span>
                     </div>
                   </div>
-                  <div>
+            <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Pain (1-5)</label>
                     <input
                       type="range"
@@ -227,38 +227,38 @@ export default function TrackerPage() {
                       <span>None</span>
                       <span>Severe</span>
                     </div>
-                  </div>
-                </div>
+              </div>
+            </div>
 
-                <div>
+            <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Symptoms</label>
                   <div className="flex flex-wrap gap-2">
-                    {symptomOptions.map((symptom) => (
-                      <button
-                        key={symptom}
-                        type="button"
-                        onClick={() => handleSymptomToggle(symptom)}
+                {symptomOptions.map((symptom) => (
+                  <button
+                    key={symptom}
+                    type="button"
+                    onClick={() => handleSymptomToggle(symptom)}
                         className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
-                          selectedSymptoms.includes(symptom)
+                      selectedSymptoms.includes(symptom)
                             ? "bg-rose-100 border-rose-300 text-rose-800"
                             : "border-gray-200 hover:border-rose-200"
-                        }`}
-                      >
-                        {symptom}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                    }`}
+                  >
+                    {symptom}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-                <button
-                  type="submit"
+            <button
+              type="submit"
                   disabled={loading}
                   className="w-full py-3 bg-rose-500 text-white font-bold rounded-xl hover:bg-rose-600 transition disabled:opacity-50"
-                >
+            >
                   {loading ? 'Saving...' : 'Log Entry'}
-                </button>
-              </form>
-            </motion.div>
+            </button>
+          </form>
+        </motion.div>
 
             {/* Right Column: Graph - Equal Height/Width */}
             <motion.div
@@ -315,12 +315,12 @@ export default function TrackerPage() {
           </div>
 
           {/* Bottom Row: History - Full Width */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="bg-white rounded-3xl p-6 shadow-lg border border-rose-100 w-full"
-          >
+        >
             <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
               <TrendingUp className="text-green-500" /> Recent History
             </h2>
@@ -343,7 +343,7 @@ export default function TrackerPage() {
             {historyLogs.length === 0 && (
               <p className="text-center text-gray-400 py-4">No recent logs found.</p>
             )}
-          </motion.div>
+        </motion.div>
 
         </div>
       </div>

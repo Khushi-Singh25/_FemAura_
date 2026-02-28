@@ -244,18 +244,28 @@ export default function Diagnosis() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             className={`mt-8 p-6 rounded-xl border ${
-              result.risk === "High Risk" ? "bg-red-50 border-red-200" : "bg-green-50 border-green-200"
+              result.risk === "High Risk" 
+                ? "bg-red-50 border-red-200" 
+                : result.risk === "Medium Risk"
+                ? "bg-yellow-50 border-yellow-200"
+                : "bg-green-50 border-green-200"
             }`}
           >
             <div className="flex items-center gap-4 mb-2">
               {result.risk === "High Risk" ? (
                 <AlertTriangle className="text-red-500" size={32} />
+              ) : result.risk === "Medium Risk" ? (
+                <AlertTriangle className="text-yellow-600" size={32} />
               ) : (
                 <CheckCircle className="text-green-500" size={32} />
               )}
               <div>
                 <h3 className={`text-xl font-bold ${
-                   result.risk === "High Risk" ? "text-red-700" : "text-green-700"
+                   result.risk === "High Risk" 
+                     ? "text-red-700" 
+                     : result.risk === "Medium Risk"
+                     ? "text-yellow-700"
+                     : "text-green-700"
                 }`}>
                   Result: {result.risk}
                 </h3>
@@ -267,6 +277,8 @@ export default function Diagnosis() {
             <p className="mt-2 text-sm text-gray-600">
               {result.risk === "High Risk" 
                 ? "Our analysis suggests a higher likelihood of PCOS. We recommend consulting a healthcare professional for a formal diagnosis."
+                : result.risk === "Medium Risk"
+                ? "You show some potential PCOS indicators. We recommend monitoring symptoms and considering a consultation with your healthcare provider."
                 : "Our analysis suggests a lower likelihood of PCOS. Maintain a healthy lifestyle and consult a doctor if you have concerns."
               }
             </p>

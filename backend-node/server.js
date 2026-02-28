@@ -17,11 +17,40 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
-console.log("Attempting to connect to MongoDB with URI:", MONGODB_URI);
+mongoose.connect(MONGODB_URI, {
+  dbName: 'femaura',
+  // Connection pool settings for better performance
+  maxPoolSize: 10,          // Max connections in pool
+  minPoolSize: 2,           // Keep 2 connections alive always
+  serverSelectionTimeoutMS: 5000,  // Timeout after 5s instead of 30s
+  socketTimeoutMS: 45000,   // Close sockets after 45s of inactivity
+  connectTimeoutMS: 10000,  // Initial connection timeout
+  heartbeatFrequencyMS: 10000, // Check connection health every 10s
+  retryWrites: true,        // Retry failed writes
+  retryReads: true          // Retry failed reads
+})
+.then(() => console.log('✅ Connected to MongoDB successfully with connection pooling'))
+.catch(err => console.error('❌ MongoDB connection error:', err));
 
-mongoose.connect(MONGODB_URI, { dbName: 'femaura' })
-.then(() => console.log('Connected to MongoDB successfully'))
-.catch(err => console.error('MongoDB connection error:', err));
+// Handle connection events
+mongoose.connection.on('connected', () => {
+  console.log('📡 MongoDB connected');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('📴 MongoDB disconnected');
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  await mongoose.connection.close();
+  console.log('MongoDB connection closed due to app termination');
+  process.exit(0);
+});
 
 // Mongoose Schemas
 const userSchema = new mongoose.Schema({
@@ -70,19 +99,21 @@ app.post('/register', async (req, res) => {
   if (!username || !email || !password) return res.status(400).json({ detail: "Missing fields" });
 
   try {
-    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    // Use lean() for faster query
+    const existingUser = await User.findOne({ $or: [{ username }, { email }] }).lean();
     if (existingUser) {
       return res.status(400).json({ detail: "Username or email already exists" });
     }
 
+    // Hash password with bcrypt (10 rounds is good balance of speed vs security)
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ username, email, password: hashedPassword });
     const savedUser = await newUser.save();
-    console.log("User Registered Successfully:", savedUser);
+    console.log("✅ User Registered Successfully:", savedUser.username);
 
     res.json({ id: newUser._id, username, email });
   } catch (e) {
-    console.error(e);
+    console.error('❌ Registration error:', e);
     res.status(500).json({ detail: "Internal error" });
   }
 });
@@ -94,15 +125,23 @@ app.post('/token', async (req, res) => {
   if (!username || !password) return res.status(400).json({ detail: "Missing credentials" });
 
   try {
-    const user = await User.findOne({ username });
+    // Use lean() for faster queries (returns plain JS object instead of Mongoose document)
+    const user = await User.findOne({ username }).lean();
     if (!user) return res.status(401).json({ detail: "Invalid credentials" });
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(401).json({ detail: "Invalid credentials" });
 
-    const token = jwt.sign({ sub: user.username, id: user._id }, process.env.SECRET_KEY, { expiresIn: '30m' });
+    // Longer token expiry to reduce re-authentication (7 days instead of 30 min)
+    const token = jwt.sign(
+      { sub: user.username, id: user._id }, 
+      process.env.SECRET_KEY, 
+      { expiresIn: '7d' }  // Changed from 30m to 7 days
+    );
+    
     res.json({ access_token: token, token_type: 'bearer' });
   } catch (e) {
+    console.error('Login error:', e);
     res.status(500).json({ detail: "Internal error" });
   }
 });
@@ -110,10 +149,14 @@ app.post('/token', async (req, res) => {
 // Get User
 app.get('/users/me', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.user.sub }).select('-password');
+    // Use lean() and select() for faster query
+    const user = await User.findOne({ username: req.user.sub })
+      .select('-password')
+      .lean();
     if (!user) return res.status(404).json({ detail: "User not found" });
     res.json(user);
   } catch (e) {
+    console.error('Get user error:', e);
     res.status(500).json({ detail: "Internal error" });
   }
 });
@@ -209,24 +252,72 @@ app.get('/api/symptoms/history', authenticateToken, async (req, res) => {
 // Proxy to Python Services
 app.post('/predict', async (req, res) => {
   try {
-    const response = await axios.post(`${PYTHON_SERVICE_URL}/predict`, req.body);
+    const response = await axios.post(`${PYTHON_SERVICE_URL}/predict`, req.body, {
+      timeout: 30000,  // 30 second timeout
+      headers: { 'Content-Type': 'application/json' }
+    });
     res.json(response.data);
   } catch (error) {
+    console.error('Prediction service error:', error.message);
     res.status(500).json({ detail: "ML Service Error" });
   }
 });
 
 app.post('/chat', async (req, res) => {
   try {
-    const response = await axios.post(`${PYTHON_SERVICE_URL}/chat`, req.body);
+    const response = await axios.post(`${PYTHON_SERVICE_URL}/chat`, req.body, {
+      timeout: 15000,  // 15 second timeout for chatbot
+      headers: { 'Content-Type': 'application/json' }
+    });
     res.json(response.data);
   } catch (error) {
+    console.error('Chat service error:', error.message);
     res.status(500).json({ detail: "Chat Service Error" });
   }
 });
 
+// Health Check Endpoints (Critical for preventing cold starts)
+app.get('/health', async (req, res) => {
+  const health = {
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    service: 'node-backend'
+  };
+  
+  // Quick DB ping to keep connection alive
+  try {
+    await mongoose.connection.db.admin().ping();
+    health.mongodb_ping = 'success';
+  } catch (err) {
+    health.mongodb_ping = 'failed';
+    health.status = 'degraded';
+  }
+  
+  res.json(health);
+});
+
+// Lightweight ping endpoint (no DB check)
+app.get('/ping', (req, res) => {
+  res.json({ status: 'alive', timestamp: Date.now() });
+});
+
+// Keep-alive endpoint to prevent cold starts
+app.get('/keepalive', (req, res) => {
+  res.json({ 
+    status: 'warm', 
+    message: 'Service is warm and ready',
+    uptime: process.uptime()
+  });
+});
+
 app.get('/', (req, res) => {
-  res.json({ message: "FemAura Node Backend (MongoDB) Running" });
+  res.json({ 
+    message: "FemAura Node Backend (MongoDB) Running",
+    status: "healthy",
+    endpoints: ['/health', '/ping', '/keepalive']
+  });
 });
 
 app.listen(PORT, () => {

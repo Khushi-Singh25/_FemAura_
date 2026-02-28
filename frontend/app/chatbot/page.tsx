@@ -57,7 +57,7 @@ export default function Chatbot() {
 
   return (
     <ProtectedRoute>
-      <div className="max-w-4xl mx-auto px-4 py-8 h-[calc(100vh-6rem)] flex flex-col">
+    <div className="max-w-4xl mx-auto px-4 py-8 h-[calc(100vh-6rem)] flex flex-col">
       <div className="text-center mb-6">
         <h1 className="text-3xl font-bold text-primary-dark">AI Gynecologist Chatbot</h1>
         <p className="text-sm text-gray-500">Ask anything about symptoms, periods, or PCOS.</p>

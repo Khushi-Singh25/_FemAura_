@@ -56,7 +56,37 @@ class ChatResponse(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"message": "FemAura ML Service is running on port 8001"}
+    return {
+        "message": "FemAura ML Service is running",
+        "status": "healthy",
+        "service": "python-ml-backend",
+        "endpoints": ["/predict", "/chat", "/health", "/ping", "/keepalive"]
+    }
+
+@app.get("/health")
+def health_check():
+    """Health check endpoint for monitoring and preventing cold starts"""
+    import time
+    return {
+        "status": "ok",
+        "service": "python-ml-backend",
+        "timestamp": time.time(),
+        "model_loaded": os.path.exists("pcos_model.pkl"),
+        "uptime": "healthy"
+    }
+
+@app.get("/ping")
+def ping():
+    """Lightweight ping endpoint"""
+    return {"status": "alive"}
+
+@app.get("/keepalive")
+def keepalive():
+    """Keep-alive endpoint to prevent cold starts"""
+    return {
+        "status": "warm",
+        "message": "ML service is warm and ready"
+    }
 
 @app.post("/predict", response_model=PredictionResult)
 def predict_pcos(data: PatientData):

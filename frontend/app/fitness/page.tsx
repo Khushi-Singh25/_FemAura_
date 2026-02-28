@@ -14,13 +14,13 @@ const yogaPoses = [
   {
     name: "Mountain Pose (Tadasana)",
     desc: "Improves posture & balance.",
-    image: "https://blog.anaheart.co.uk/wp-content/uploads/2018/07/mountain-yoga-pose.png",
+    image: "https://yuvaap.com/wp-content/uploads/2022/09/Tree-pose-or-Vrakshasana.jpg",
     youtubeLink: "https://www.youtube.com/shorts/E1xym-F_B84"
   },
   {
     name: "Bridge Pose (Setu Bandhasana)",
     desc: "Strengthens core & improves metabolism.",
-    image: "https://www.arhantayoga.org/wp-content/uploads/2022/12/Half-Bridge-Pose-Ardha-Setu-Bandhasana-1.jpg",
+    image: "https://img.etimg.com/thumb/msid-126249066,width-480,height-360,imgsize-346222,resizemode-75/bridge-pose-to-strengthen-the-spine.jpg",
     youtubeLink: "https://www.youtube.com/watch?v=SoOepykWJLw"
   },
   {
